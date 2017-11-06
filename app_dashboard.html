@@ -11,18 +11,19 @@
 	<div class="panel-heading">
 		<h3 class="panel-title">&raquo;&nbsp;Energiekosten</h3>
 	</div>
-	  <div class="panel-body">
-	<h2>Stromerzeugung</h2>
-	<div class="row">
-		<div class="col-md-3"><h4>Zählerstand</h4><span id='reading'></span></div>
-		<div class="col-md-3"><h4>Zeitpunkt</h4><span id='time'></span></div>
-		<div class="col-md-3"><h4>Energiemenge (abrechenbar)</h4><span id='base'></span></div>
-		<div class="col-md-3" style='text-align:right'><h4>Energieumsatz</h4><span id='balance' class='value_balance' data='0'></span></div>
-	</div>	
-	<h2>Vermarktung an lokale Verbraucher</h2>
+	  <div class="panel-body">	
+	<h3>Vermarktung an lokale Verbraucher</h3>
 	<table id="assets" class="table">
 		<tr><th>Verbraucher</th><th>Vergütung</th><th>Gelieferte Menge</th><th style="text-align:right">Umsatz</th></tr>
 	</table>
+	</div>
+	<div class="panel-footer">
+		<div class="row">
+			<div class="col-md-3"><h4>Zählerstand</h4><span id='reading'></span></div>
+			<div class="col-md-3"><h4>Zeitpunkt</h4><span id='time'></span></div>
+			<div class="col-md-3"><h4>Energiemenge (abrechenbar)</h4><span id='base'></span></div>
+			<div class="col-md-3" style='text-align:right'><h4><span id='balance' class='value_balance' data='0'></span></h4></div>
+		</div>
 	</div>
 	</div>	
 	<div class="panel panel-primary">
@@ -34,7 +35,7 @@
 				<div class="col-md-3"><h4>pro Jahr</h4><span id='infra_year'></span></div>
 				<div class="col-md-3"><h4>ab</h4><span id='infra_time'></span></div>
 				<div class="col-md-3"></div>
-				<div class="col-md-3" style='text-align:right'><h4>Wert</h4><span id='infra_bal' data='0'></span></div>
+				<div class="col-md-3" style='text-align:right'><h4><span id='infra_bal' data='0'></span></h4></div>
 			</div>
 	</div>
 	</div>
@@ -51,11 +52,12 @@
 			<div class="row">
 				<div class="col-md-6"><h4>Kapazität</h4></div>
 				<div class="col-md-6" style='text-align:right'><span id='invest_cap' data="0"></span></div>
-			</div>
-			<hr/>
+			</div>		
+		</div>
+		<div class="panel-footer">
 			<div class="row">
 				<div class="col-md-6"><h4>Saldo</h4></div>
-				<div class="col-md-6" style='text-align:right'><span id='invest_saldo'></span></div>
+				<div class="col-md-6" style='text-align:right'><h4><span id='invest_saldo'></span></h4></div>
 			</div>
 		</div>
 	</div>
@@ -125,7 +127,7 @@ $('#long_name').html(window.localStorage.getItem("address_"+node.wallet.address.
 				if(balance<0) {
 					$('#balance').css('color','red');
 				} else {
-					$('#balance').css('color','blue');
+					$('#balance').css('color','back');
 				}
 				$('#invest_value').attr('data',balance);
 				var balance = $('#balance').attr('data-base-haben')-$('#balance').attr('data-base-soll');
