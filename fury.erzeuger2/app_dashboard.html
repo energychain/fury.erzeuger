@@ -1,0 +1,225 @@
+<div id="app_router">
+		<div class="row">
+	<div class="col-md-6"><h1 id="long_name">Erzeuger</h1></div>
+		<div class="col-md-6" style="text-align:right"> 
+					<a href="https://stromdao.de/"><img src="https://demo.stromdao.de/stromdao_logo.png"></a><br>
+					<em style="color:#999999">digital energy infrastructure for tomorrow.</em>
+		</div>
+	</div>	
+	<hr/>
+	<div class="panel panel-danger">
+	<div class="panel-heading">
+		<h3 class="panel-title">&raquo;&nbsp;Energiekosten</h3>
+	</div>
+	  <div class="panel-body">
+	<h2>Stromerzeugung</h2>
+	<div class="row">
+		<div class="col-md-3"><h4>Zählerstand</h4><span id='reading'></span></div>
+		<div class="col-md-3"><h4>Zeitpunkt</h4><span id='time'></span></div>
+		<div class="col-md-3"><h4>Energiemenge (abrechenbar)</h4><span id='base'></span></div>
+		<div class="col-md-3" style='text-align:right'><h4>Energieumsatz</h4><span id='balance' class='value_balance' data='0'></span></div>
+	</div>	
+	<h2>Vermarktung an lokale Verbraucher</h2>
+	<table id="assets" class="table">
+		<tr><th>Verbraucher</th><th>Vergütung</th><th>Gelieferte Menge</th><th style="text-align:right">Umsatz</th></tr>
+	</table>
+	</div>
+	</div>	
+	<div class="panel panel-primary">
+	<div class="panel-heading">
+		<h3 class="panel-title">&raquo;&nbsp;Infrastrukturkosten</h3>
+	</div>
+	<div class="panel-body">
+			<div class="row">
+				<div class="col-md-3"><h4>pro Jahr</h4><span id='infra_year'></span></div>
+				<div class="col-md-3"><h4>ab</h4><span id='infra_time'></span></div>
+				<div class="col-md-3"></div>
+				<div class="col-md-3" style='text-align:right'><h4>Wert</h4><span id='infra_bal' data='0'></span></div>
+			</div>
+	</div>
+	</div>
+	
+	<div class="panel panel-success">
+		<div class="panel-heading">
+			<h3 class="panel-title">&raquo;&nbsp;Umlage</h3>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-md-6"><h4>Arbeit</h4></div>
+				<div class="col-md-6" style='text-align:right'><span id='invest_value' data="0"></span></div>
+			</div>
+			<div class="row">
+				<div class="col-md-6"><h4>Kapazität</h4></div>
+				<div class="col-md-6" style='text-align:right'><span id='invest_cap' data="0"></span></div>
+			</div>
+			<hr/>
+			<div class="row">
+				<div class="col-md-6"><h4>Saldo</h4></div>
+				<div class="col-md-6" style='text-align:right'><span id='invest_saldo'></span></div>
+			</div>
+		</div>
+	</div>
+				
+</div>
+<script>
+var tout=0;
+
+$.fn.exists = function () {
+    return this.length !== 0;
+}
+var app_run = function() {
+if(tout!=0) {
+clearTimeout(tout);
+}
+tout=setTimeout(app_run,30000);
+$('#long_name').html(window.localStorage.getItem("address_"+node.wallet.address.toLowerCase()));
+	var balancing=function() {
+		
+	}
+	var invest_calc = function() {
+			$('#invest_cap').html((($('#invest_cap').attr('data')*1)/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+			$('#invest_value').html((($('#invest_value').attr('data')*1)/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+			$('#invest_saldo').html((($('#invest_cap').attr('data')*1-$('#invest_value').attr('data')*1)/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+	}
+	var renderMPS=function(address,cutkn_address,total_supply,share) {					
+		if(!$('#asset_'+address).exists()) {
+			var html="";
+			html+="<tr id='asset_"+address+"'>";
+			html+="<td>"+resolve(address)+"</td>";
+			html+="<td><span id='cost_"+address+"'></span></td>";
+			html+="<td><span id='base_"+address+"'></span></td>";
+			html+="<td style='text-align:right'><span  id='haben_"+address+"' class='value_balance' data='0'></span></td>";
+			html+="</tr>";
+			$('#assets').append(html);
+		}
+		
+
+			
+			var factor = share/total_supply;
+			var haben=$('#balance').attr('data')*1;
+			var base=$('#balance').attr('data-base')*1;
+			$('#haben_'+address).html(((haben*factor)/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+			$('#haben_'+address).attr('data',Math.round(haben*factor));
+			
+			var base_html=((base*factor)/1000).toLocaleString(undefined, { minimumFractionDigits:3, maximumFractionDigits:3 })+" KWh";
+			$('#cost_'+address).html(((haben/base)/10000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €/KWh");														
+			$('#base_'+address).html(base_html);	
+			$('#base_'+address).attr('data',base);														
+			balancing();
+			invest_calc();														
+	};
+	
+	node.mpr().then(function(mpr) {
+			mpr.readings(node.wallet.address).then(function(reading) {				
+					$('#reading').html((reading.power.toString()/1000).toLocaleString(undefined, { minimumFractionDigits:3, maximumFractionDigits:3 })+" KWh");
+					$('#reading').attr('data',reading.power.toString());
+					$('#time').html(new Date(reading.time.toString()*1000).toLocaleString());
+					$('#time').attr('data',reading.time.toString());
+			});
+	});
+	node.stromkonto(document.stromdao_blg).then(function(sko) {
+			var balanceIt = function() {
+				var balance = $('#balance').attr('data-haben')-$('#balance').attr('data-soll');
+				$('#balance').attr('data',balance);
+				$('#balance').html( (balance/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €" );
+				if(balance<0) {
+					$('#balance').css('color','red');
+				} else {
+					$('#balance').css('color','blue');
+				}
+				$('#invest_value').attr('data',balance);
+				var balance = $('#balance').attr('data-base-haben')-$('#balance').attr('data-base-soll');
+				$('#balance').attr('data-base',balance);
+				$('#base').html( (balance/1000).toLocaleString(undefined, { minimumFractionDigits:3, maximumFractionDigits:3 })+" KWh" );
+				if(balance<0) {
+					$('#base').css('color','red');
+				} else {
+					$('#base').css('color','black');
+				}
+				
+				balancing();
+				
+			}
+			sko.balancesHaben(node.wallet.address).then(function(haben) {
+					$('#balance').attr('data-haben',haben);
+					balanceIt();
+			});
+			sko.balancesSoll(node.wallet.address).then(function(soll) {
+					$('#balance').attr('data-soll',soll);
+					balanceIt();
+			});	
+			sko.baseHaben(node.wallet.address).then(function(haben) {
+					$('#balance').attr('data-base-haben',haben);
+					balanceIt();
+			});
+			sko.baseSoll(node.wallet.address).then(function(soll) {
+					$('#balance').attr('data-base-soll',soll);
+					balanceIt();
+			});	
+	});
+	node.roleLookup().then(function(rl) {
+			rl.relations(node.wallet.address,45).then(function(cutoken_address) {				
+				node.cutoken(cutoken_address).then(function(cutoken) {	
+									
+						var mps=[];
+						var j=10;
+						for(var i=0;i<j;i++) {
+							mps.push(new Promise(function(res3,rej3) {							
+							cutoken.obj.targets(i).then(function(mp) {								
+								res3(mp[0]);
+							}).catch(function(e) {res3();});									
+						}));
+						}
+
+						var retrieveBalance=function(mpdelta_address,cutoken_address,total_supply) {
+							node.erc20token(cutoken_address).then(function(e20) {
+								node.mpdelta(mpdelta_address).then(function(mpdelta) {
+									
+									mpdelta.meterpoint().then(function(mp) {
+										mp=mp[0];
+										e20.balanceOf(mp).then(function(share) {											
+											renderMPS(mp,cutoken_address,total_supply,share);
+										});
+									});
+								});
+							});
+						}
+						Promise.all(mps).then(function(values) {
+							var mps=[];
+							node.erc20token(cutoken_address).then(function(e20) {
+								e20.totalSupply().then(function(total_supply) {
+								for(var i=0;i<values.length;i++) {
+										if(typeof values[i] != "undefined") {											
+											retrieveBalance(values[i],cutoken_address,total_supply);
+										}						
+									}
+								});
+							});											
+						});
+				});				
+			});				
+			rl.relations(node.wallet.address,10).then(function(infra_address) {		
+				node.mpr().then(function(mpr) {					
+					mpr.readings(infra_address).then(function(reading) {
+							$('#infra_year').html((reading.power.toString()/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+							$('#infra_year').attr('data',reading.power.toString());
+							$('#infra_time').html(new Date(reading.time.toString()*1000).toLocaleString());
+							$('#infra_time').attr('data',reading.time.toString());
+							var t1=new Date(reading.time.toString()*1000);
+							var t2=new Date();
+							var years = (t2-t1)/(365*86400000);
+							$('#infra_bal').html(((years*reading.power.toString())/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
+							$('#invest_cap').attr('data',years*reading.power.toString());
+							invest_calc();
+					});	
+				});	
+			});
+	});	
+	
+}
+$('.navbar-left').click(function() { app("app_dashboard.html"); });
+$(document).ready(function() {
+	app_run();
+});
+tout=setTimeout(app_run,30000);
+</script>

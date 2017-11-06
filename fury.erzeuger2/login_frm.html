@@ -1,0 +1,103 @@
+<div id="brain_frm">	
+	<form action="" method="GET">
+		 <div class="form-group">
+				<label for="username">Benutzername</label>
+				<input type="text" class="form-control" id="username" name="username">						
+		</div>	
+		 <div class="form-group">
+				<label for="password">Passwort</label>
+				<input type="password" class="form-control" id="password" name="password">
+				<button id="open_username" class="btn btn-primary" style="margin:5px;" type="button">Öffnen</button>
+		</div>		
+	</form>
+</div>
+<div id="pk_frm" style="display:none">
+							<form action="" method="GET">
+								 <div class="form-group">
+										<label for="pk_secret">Privater Schlüssel</label>
+										<input type="text" class="form-control" id="pk_secret" name="pk_secret">						
+								</div>	
+								 <div class="form-group">
+										<button id="cancel_pk" class="btn btn-default" style="margin:5px;" type="button">Abbruch</button>
+										<button id="open_pk" class="btn btn-primary" style="margin:5px;" type="button">Öffnen</button>
+								</div>		
+							</form>
+						</div>
+<script>
+function open_username(node) {
+	window.localStorage.setItem("address_"+"0xE7159EA1d72625c53749e19C3fB9093d2Dea2a53".toLowerCase(),"Mieter: Musterfamilie");
+	window.localStorage.setItem("address_"+"0x666C7b36432A977320792C4B198B283Ae21c0048".toLowerCase(),"Mieter: 1P Haushalt");
+	window.localStorage.setItem("address_"+"0x5EC43eE47affb1E0D7705D675E7F451Da26Ea08c".toLowerCase(),"eMobil");
+	window.localStorage.setItem("address_"+"0x3a6259CD89AFbA086DC09676310F29f15FB67aCc".toLowerCase(),"Stromspeicher");
+	window.localStorage.setItem("address_"+"0x164c9ee802256820b44668A2F1665F67E36531d2".toLowerCase(),"Photovoltaik");
+	window.localStorage.setItem("address_"+"0x0b00dD24e5EAB94B590EeD4B1CC0634a648290C3".toLowerCase(),"Sekundär EE Vermarktung");
+	window.localStorage.setItem("address_"+"0x3Dfb31fF5111B98947B8f527f387cbC0637e66E1".toLowerCase(),"Speicherladung");
+	
+	
+	$('.account').html(resolve(node.wallet.address));
+	node.roleLookup().then(function(rl) {
+		rl.relations(node.wallet.address,42).then(function(tx) {
+				document.stromdao_sc=tx;
+				app("./app_dashboard.html");
+		});
+		rl.relations(node.wallet.address,41).then(function(tx) {
+				document.stromdao_blg=tx;				
+		});
+		rl.relations(node.wallet.address,45).then(function(tx) {
+				document.stromdao_cutkn=tx;				
+		});
+	});	
+}
+$('#open_username').click(function() {
+	$('#open_username').attr('disabled','disabled');
+	var account_obj=new document.StromDAOBO.Account($('#username').val(),$('#password').val());
+	account_obj.wallet().then(function(wallet) {
+		node.roleLookup().then(function(rl) {
+			rl.relations(wallet.address,222).then(function(tx) {
+				if(tx=="0x0000000000000000000000000000000000000000") {
+					$('#pk_secret').val(node.wallet.privateKey);
+					$('#brain_frm').hide();									
+					$('#pk_frm').show();
+					$('#cancel_pk').click(function() {
+							$('#pk_rm').hide();
+							$('#brain_frm').show();
+					});
+					$('#open_pk').click(function() {
+						$('#open_pk').attr('disabled','disabled');
+						$('#cancel_pk').attr('disabled','disabled');
+						account_obj.encrypt($('#pk_secret').val()).then(function(enc) {
+							node.stringstoragefactory().then(function(ssf) {
+								ssf.build(enc).then(function(ss) {											
+									window.localStorage.setItem("ext:"+extid,$('#pk_secret').val());
+									node = new document.StromDAOBO.Node({external_id:extid,testMode:true,rpc:"https://fury.network/rpc",abilocation:abilocation	});
+									node.roleLookup().then(function(rl2) {
+										rl2.setRelation(222,ss).then(function(tx) {
+												open_username(node);									
+										});
+									});
+								});
+							});
+						});
+					});
+				} else {
+					node.stringstorage(tx).then(function(ss) {
+						ss.str().then(function(str) {
+							account_obj.decrypt(str).then(function(pk) {
+																
+								window.localStorage.setItem("ext:"+extid,pk);
+								node = new document.StromDAOBO.Node({external_id:extid,testMode:true,rpc:"https://fury.network/rpc",abilocation:abilocation});
+								$('.account').html(resolve(node.wallet.address));
+								node.roleLookup().then(function(rl) {
+									rl.relations(node.wallet.address,42).then(function(tx) {
+										open_username(node);
+									});
+								});	
+							});
+						});
+					});
+				}
+			});
+		});
+	});
+});	
+</script>
