@@ -45,7 +45,7 @@ function open_username(node) {
 		});
 		rl.relations(node.wallet.address,45).then(function(tx) {
 				document.stromdao_cutkn=tx;				
-		});
+		});		
 	});	
 }
 $('#open_username').click(function() {
@@ -82,21 +82,28 @@ $('#open_username').click(function() {
 				} else {
 					node.stringstorage(tx).then(function(ss) {
 						ss.str().then(function(str) {
-							account_obj.decrypt(str).then(function(pk) {
-																
+							account_obj.decrypt(str).then(function(pk) {																
 								window.localStorage.setItem("ext:"+extid,pk);
 								node = new document.StromDAOBO.Node({external_id:extid,testMode:true,rpc:"https://fury.network/rpc",abilocation:abilocation});
 								$('.account').html(resolve(node.wallet.address));
-								node.roleLookup().then(function(rl) {
-									rl.relations(node.wallet.address,42).then(function(tx) {
-										open_username(node);
-									});
-								});	
+								open_username(node);
 							});
 						});
 					});
 				}
 			});
+		rl.relations(wallet.address,11).then(function(tx) {
+			node.stringstorage(tx).then(function(str) {
+					str.str().then(function(ipfshash) {
+						account_obj.decrypt(ipfshash).then(function(ipfshash) {
+							console.log("Try to load profile",ipfshash);
+							$.get("https://fury.network/ipfs/"+ipfshash,function(data) {
+									document.stromdao_uiprofile=data;	
+							});
+						});
+					});
+			});			
+		});
 		});
 	});
 });	

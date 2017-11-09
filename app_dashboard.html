@@ -30,14 +30,21 @@
 	<div class="panel-heading">
 		<h3 class="panel-title">&raquo;&nbsp;Infrastrukturkosten</h3>
 	</div>
-	<div class="panel-body">
+	<div class="panel-body" id="infra_panel">
 			<div class="row">
 				<div class="col-md-3"><h4>pro Jahr</h4><span id='infra_year'></span></div>
 				<div class="col-md-3"><h4>ab</h4><span id='infra_time'></span></div>
 				<div class="col-md-3"></div>
 				<div class="col-md-3" style='text-align:right'><h4><span id='infra_bal' data='0'></span></h4></div>
 			</div>
+					
 	</div>
+		<div class="panel-footer">
+			<div class="row">
+				<div class="col-md-6"><h4>Saldo</h4></div>
+				<div class="col-md-6" style='text-align:right'><h4><span id='infra_saldo'></span></h4></div>
+			</div>
+		</div>
 	</div>
 	
 	<div class="panel panel-success">
@@ -210,13 +217,21 @@ $('#long_name').html(window.localStorage.getItem("address_"+node.wallet.address.
 							var t1=new Date(reading.time.toString()*1000);
 							var t2=new Date();
 							var years = (t2-t1)/(365*86400000);
-							$('#infra_bal').html(((years*reading.power.toString())/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");
-							$('#invest_cap').attr('data',years*reading.power.toString());
+							$('#infra_bal').html(((years*reading.power.toString())/10000000).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })+" €");							
+							$('#infra_bal').attr('data',years*reading.power.toString());
+							$('#invest_cap').attr('data',$('#infra_saldo').attr('data'));
 							invest_calc();
 					});	
 				});	
 			});
 	});	
+	if(typeof document.stromdao_uiprofile != "undefined") {
+			eval(document.stromdao_uiprofile);
+			
+			
+			
+
+	}
 	
 }
 $('.navbar-left').click(function() { app("app_dashboard.html"); });
