@@ -23,6 +23,17 @@
 				});				
 		});
 	};
+	$.fillIPFS = function(hash) {
+		$.getJSON("https://ipfs.io/ipfs/"+hash,function(data) {
+				data["ipfs-hash"]=hash;
+				$.each(data,function(i,v) {
+						if(i!="ipfs-hash") {
+							$("#"+i).html(v);
+							$("#"+i).attr('readonly','readonly');
+						}
+				});				
+		});
+	};
     $.fn.persist = function() {
 		console.log(this.length);
 		var obj={};
